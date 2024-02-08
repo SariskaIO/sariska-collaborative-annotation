@@ -1,5 +1,4 @@
 export const SARISKA_API_KEY = process.env.REACT_APP_SARISKA_MEET_APP_API_KEY;
-
 export const MESSAGING_API_SERVICE_HOST = `${process.env.REACT_APP_API_SERVICE_HOST}/api/v1/messaging`;
 export const WEB_SOCKET_URL = `${process.env.REACT_APP_WEBSOCKET_SERVICE_HOST}/api/v1/messaging/websocket`;
 export const SARISKA_WEBSITE = 'https://sariska.io';

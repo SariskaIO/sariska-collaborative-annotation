@@ -1,10 +1,70 @@
-import { MESSAGING_API_SERVICE_HOST, SARISKA_API_KEY } from "../config";
-import {GENERATE_TOKEN_URL, GET_PRESIGNED_URL} from "../constants";
-import linkifyHtml from 'linkify-html';
-
-const Compressor = require('compressorjs');
+import { SARISKA_API_KEY } from "../config";
+import { GENERATE_TOKEN_URL } from "../constants";
 
 export function getUserId() {
+    let storedUserId = JSON.parse((localStorage.getItem('sariska-collaborative-userId')));
+    if(storedUserId){
+        return storedUserId;
+    }
+    const characters ='abcdefghijklmnopqrstuvwxyz0123456789';
+    function generateString(length) {
+        let result = ' ';
+        const charactersLength = characters.length;
+        for ( let i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+    let userId = generateString(12).trim();
+    localStorage.setItem('sariska-collaborative-userId', JSON.stringify(userId));
+    return userId;
+} 
+
+export function getUserName() {
+    let storedUserName = JSON.parse((localStorage.getItem('sariska-collaborative-userName')));
+    if(storedUserName){
+        return storedUserName;
+    }
+    const characters ='abcdefghijklmnopqrstuvwxyz';
+    function generateString(length) {
+        let result = ' ';
+        const charactersLength = characters.length;
+        for ( let i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+    const str = generateString(8).trim()
+    const strArr = str.match(/.{4}/g);
+    const userName = strArr.join("_")
+    localStorage.setItem('sariska-collaborative-userName', JSON.stringify(userName));
+    return userName;
+} 
+
+export function getRoomId() {
+    let storedRoomId = JSON.parse((localStorage.getItem('sariska-collaborative-roomId')));
+    if(storedRoomId){
+        return storedRoomId;
+    }
+    const characters ='abcdefghijklmnopqrstuvwxyz0123456789';
+    function generateString(length) {
+        let result = ' ';
+        const charactersLength = characters.length;
+        for ( let i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+    const roomId = generateString(9).trim();
+    localStorage.setItem('sariska-collaborative-roomId', JSON.stringify(roomId));
+    return roomId;
+} 
+
+export function getRoomName() {
+    let storedRoomName = JSON.parse((localStorage.getItem('sariska-collaborative-roomName')));
+    if(storedRoomName){
+        return storedRoomName;
+    }
     const characters ='abcdefghijklmnopqrstuvwxyz';
     function generateString(length) {
         let result = ' ';
@@ -16,8 +76,10 @@ export function getUserId() {
     }
     const str = generateString(9).trim()
     const strArr = str.match(/.{3}/g);
-    return strArr.join("-");
-}
+    const roomName = strArr.join("-")
+    localStorage.setItem('sariska-collaborative-roomName', JSON.stringify(roomName));
+    return roomName;
+} 
 
 export const getToken = async (username, userId)=> {
     const body = {
@@ -38,6 +100,8 @@ export const getToken = async (username, userId)=> {
         const response = await fetch(GENERATE_TOKEN_URL, body);
         if (response.ok) {
             const json = await response.json();
+            let token = json.token;
+            localStorage.setItem('sariska-colloborative-token', JSON.stringify(token));
             return json.token;
         } else {
             console.log(response.status);
@@ -46,100 +110,6 @@ export const getToken = async (username, userId)=> {
         console.log(error);
     }
 
-}
-
-
-export function getPresignedUrl(params) {
-    return new Promise((resolve, reject) => {
-        const body = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("SARISKA_CHAT_TOKEN"))}`
-            },
-            body: JSON.stringify({
-                fileType: params.fileType,
-                fileName: params.fileName
-            })
-        };
-
-        fetch(GET_PRESIGNED_URL, body)
-            .then((response) => {
-                if (response.ok) {
-                    return response.json(); //then consume it again, the error happens
-                }
-            })
-            .then(function (response) {
-                resolve(response);
-            }).catch((error) => {
-                console.log(error);
-            reject(error)
-        })
-    });
-}
-
-export function formatBytes(bytes) {
-    var marker = 1024; // Change to 1000 if required
-    var decimal = 3; // Change as required
-    var kiloBytes = marker; // One Kilobyte is 1024 bytes
-    var megaBytes = marker * marker; // One MB is 1024 KB
-    var gigaBytes = marker * marker * marker; // One GB is 1024 MB
-    var teraBytes = marker * marker * marker * marker; // One TB is 1024 GB
-
-    // return bytes if less than a KB
-    if (bytes < kiloBytes) return bytes + " Bytes";
-    // return KB if less than a MB
-    else if (bytes < megaBytes) return (bytes / kiloBytes).toFixed(decimal) + " KB";
-    // return MB if less than a GB
-    else if (bytes < gigaBytes) return (bytes / megaBytes).toFixed(decimal) + " MB";
-    // return GB if less than a TB
-    else return (bytes / gigaBytes).toFixed(decimal) + " GB";
-}
-
-
-export function compressFile(file, type) {
-    return new Promise((resolve, reject) => {
-        if (type === "attachment") {
-            resolve(file);
-        } else {
-            new Compressor(file, {
-                quality: 0.6,
-                success(result) {
-                    resolve(result);
-                },
-                error(err) {
-                    reject(err.message);
-                }
-            });
-        }
-    });
-}
-
-export function getUniqueNumber() {
-    return Math.floor(100000 + Math.random() * 900000);
-}
-
-
-export const linkify=(inputText) =>{
-    const options = { defaultProtocol: 'https',   target: '_blank'};
-    return linkifyHtml(inputText, options);
-}
-
-export function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
-export const getIntialUpperCaseString = (string) => {
-    if(string){
-        return string.slice(0,1).toUpperCase()
-    }else{
-        return ''
-    };
 }
 
 export const renderAction = (type, payload) => {
@@ -155,115 +125,21 @@ export const renderAction = (type, payload) => {
     }
 }
 
-export async function apiCall(path, method, body = {}, headers = {}, loader=false) {
-    let url = `${MESSAGING_API_SERVICE_HOST}${path}`;
-    const requestHeaders = {
-        "Content-Type": "application/json", 
-        "Authorization": `Bearer ${
-            JSON.parse(localStorage.getItem("SARISKA_CHAT_TOKEN"))
-        }`,
-        ...headers
-    };
-    if (method.toUpperCase() === "GET" && Object.keys(body).length) {
-        const queryString = new URLSearchParams(body).toString();
-        url = `${url}?${queryString}`;
-    }
-    
-    const payload = {
-        method,
-        headers: requestHeaders,
-    };
-    if (method.toUpperCase() !== "GET" && method.toUpperCase() !== "HEAD") {
-        payload.body = JSON.stringify(body);
-    }
-  
-    try {
-        const response = await fetch(url, payload);
-        if (response.status === 401) {
-            console.log('not authenticated');
-        }
-  
-        if (response.status === 403 && method.toUpperCase() !== "GET") {
-            console.log('not autherized');
-        }
-  
-        if (response.status === 204) {
-            return {};
-        }
-        if (response.ok) {
-            return await response.json();
-        }
-        return {
-            httpStatus: response.status,
-            statusText: response.statusText,
-            body: await response.json(),
-        };
-    } catch (error) {
-        return {error, httpStatus: 500};
-    }
-  }
+export function drawLine(ctx, end, start, color, width) {
+    start = start ?? end;
+    ctx.beginPath();
+    ctx.lineWidth= width;
+    ctx.strokeStyle = color;
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
 
-  export const isEmptyObject = (obj) => {
-    if(typeof obj !== 'object' ) return false;
-    return Object.keys(obj).length === 0;
-  };
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(start.x, start.y, 2, 0, 2 * Math.PI);
+    ctx.fill()
+}
 
-//   export const pushMessage = (message, options, type, user, setMessages, chatChannel)=>{
-     
-//       const new_message =  {
-//         content: message, 
-//         content_type: type, 
-//         created_by_name: user.name,  
-//         options: options,
-//         x: "uu", 
-//         y: { x: "ghhg"}
-//       };
-//       setMessages(messages => [...messages, new_message]);
-//       chatChannel.push('new_message', new_message);
-//   };
-//   export const pushOptions = (option, type, setMessages, chatChannel)=>{
-//     const new_option =  {
-//       option: option,
-//       contentType: type
-//     };
-//     setMessages(messages => [...messages, new_option]);
-//     chatChannel.push('new_option', new_message);
-// };
-  
-  export const adjustTextMessage = (text) => {
-    return text.trim();
-  };
-  
-  export const isMessageEmpty = (text, fileAttached) => {
-    let textLength = adjustTextMessage(text).length;
-    let fileLength = fileAttached.length;
-    if (
-      (!textLength && fileLength) ||
-      (textLength && !fileLength) ||
-      (textLength && fileLength)
-    ) {
-      return false;
-    } else {
-      return true;
-    }
-  };
-
-  export const hasDuplicates = (array) => {
-    return new Set(array).size !== array.length;
-  }
-
-  export const getMaxInArray = (arr) => {
-    if(!arr?.length) return 0;
-    else return Math.max(...arr);
-  }
-
-  export const getSingularOrPlural = (num, text) => {
-    return num > 1 ? text + 's' : text;
-  }
-
-  export const convertTimestamptoLocalDateTime = (timestamp) => {
-    const datetime = new Date(timestamp);
-    let time = datetime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
-    let date = datetime.toDateString();
-    return date +' '+time;
-  }
+export function onDraw (data) {
+    drawLine(data.ctx, data.point, data.prevPoint, '#000', 5);
+}

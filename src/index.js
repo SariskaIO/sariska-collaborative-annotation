@@ -3,12 +3,15 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { StoreProvider } from "./context";
+import SocketProvider from "./context/socket/SocketProvider";
+import { StoreProvider } from "./context/store/StoreProvider";
 
 ReactDOM.render(
   <React.StrictMode>
     <StoreProvider>
+      <SocketProvider>
         <App />
+      </SocketProvider>
     </StoreProvider>
   </React.StrictMode>,
   document.getElementById("root")

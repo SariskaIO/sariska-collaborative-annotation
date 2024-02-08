@@ -10,6 +10,7 @@ import { setRoom } from './store/action/room';
 import { setUser } from './store/action/user';
 import { SET_ROOM, SET_USER } from './store/action/types';
 import { onDraw } from './utils';
+import note from './assets/images/note.png';
 
 const App = ()=> {
   const [messages, setMessages] = useState([]);
@@ -69,6 +70,20 @@ const App = ()=> {
   return (
       <SocketProvider>
         <BackdropLoader open={loading} />
+        <iframe
+          src="http://infolab.stanford.edu/pub/papers/google.pdf#toolbar=0&navpanes=0&scrollbar=0"
+          height="500"
+          width="700"
+          title='stanford'
+          style={{position: 'absolute', zIndex: 1}}
+      ></iframe>
+        {/* <img 
+          alt='note'
+          src={note} 
+          width={700}
+          height={500} 
+          style={{position: 'absolute', zIndex: 1}}
+          /> */}
         <DrawingBoard
           messages={messages} 
           pushMessage={pushMessage} 

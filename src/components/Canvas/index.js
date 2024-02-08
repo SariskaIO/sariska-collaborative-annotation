@@ -32,4 +32,6 @@ export default Canvas
 
 const canvasStyle={
     border: `1px solid black`,
+    position: 'relative', 
+    zIndex: 10
 }
